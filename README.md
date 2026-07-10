@@ -71,31 +71,34 @@ same warmup guard, etc.).
 
 ## Quick start
 
-Requires [Bun](https://bun.sh) ≥ 1.3 and Node 18+ (for Vite).
+Requires [Bun](https://bun.sh) ≥ 1.3 (and Node 18+ for Vite).
 
 ```bash
-# install
-cd server && bun install
-cd ../web && bun install
+# install everything (root, web, server)
+bun run install:all
 
-# dev — runs both server (port 3001) and web (port 5173) in parallel
-# (or open two terminals:)
-cd server && bun run dev
-cd web   && bun run dev
+# dev — runs server (port 3001) and web (port 5173) in parallel
+bun run dev
 ```
 
 Open <http://localhost:5173>. The server caches OHLC under
 `server/data/stockgraber.db`.
 
-### Production build
+If you prefer two terminals, the same thing in long form:
 
 ```bash
-# build the web bundle
-cd web && bun run build
-
-# build + run the server (serves API only)
-cd ../server && bun run build && bun run start
+cd server && bun install && bun run dev   # terminal 1
+cd web    && bun install && bun run dev   # terminal 2
 ```
+
+### Other scripts
+
+| Command | What it does |
+|---|---|
+| `bun run dev:server` | Run only the API server on port 3001 |
+| `bun run dev:web` | Run only the Vite dev server on port 5173 |
+| `bun run build` | Build the SPA into `web/dist/` |
+| `bun run start` | Run the API server in production mode (serves `web/dist/` as static files) |
 
 ---
 
