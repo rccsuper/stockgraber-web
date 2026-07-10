@@ -1,0 +1,18 @@
+{
+  "name": "stockgraber-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "StockGraber — a dark-themed web stock charter (candlesticks, MA crossovers, RSI/MACD, percent-change index comparison) backed by Yahoo Finance.",
+  "scripts": {
+    "install:all": "bun install && cd web && bun install && cd ../server && bun install",
+    "dev": "concurrently -k -n server,web -c blue,magenta \"bun run dev:server\" \"bun run dev:web\"",
+    "dev:server": "cd server && bun run dev",
+    "dev:web": "cd web && bun run dev",
+    "build": "cd web && bun run build",
+    "start": "cd server && bun run start",
+    "typecheck": "cd web && bunx tsc --noEmit"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
