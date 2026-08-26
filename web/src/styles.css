@@ -116,7 +116,7 @@ input, select, button { color: inherit; }
 }
 .seg {
   background: transparent; border: none; border-radius: 7px;
-  padding: 6px 10px; color: var(--mut); font-weight: 600; font-size: 12px;
+  padding: 6px 10px; color: var(--txt2); font-weight: 600; font-size: 12px;
   cursor: pointer;
 }
 .seg:hover { color: var(--txt); }
