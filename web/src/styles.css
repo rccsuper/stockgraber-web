@@ -123,7 +123,7 @@ input, select, button { color: inherit; }
 /* body */
 .body { display: flex; flex: 1; min-height: 0; }
 
-.chart-stack { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; min-height: 0; }
+.chart-stack { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; min-height: 0; position: relative; }
 
 /* chart column */
 .charts { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -146,6 +146,23 @@ input, select, button { color: inherit; }
   text-align: right;
   line-height: 1.4;
 }
+
+/* OHLC hover box (rendered at runtime as .info-box). Absolute overlay so
+ * toggling it on/off never reflows the chart and triggers a flicker loop. */
+.info-box {
+  position: absolute; top: 14px; left: 18px;
+  background: rgba(8,8,10,0.82);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px; padding: 9px 13px;
+  color: var(--txt2);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  z-index: 3; pointer-events: none;
+  white-space: nowrap;
+}
+.info-box .info-date { color: var(--mut2); font-size: 10px; margin-bottom: 3px; }
+.info-box .lbl { color: var(--mut2); }
+.info-box .c { color: var(--txt); font-weight: 600; }
 
 /* OHLC hover box */
 .ohlc-box {

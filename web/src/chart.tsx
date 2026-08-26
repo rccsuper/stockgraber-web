@@ -92,6 +92,7 @@ export class Chart {
 
   private rafPending = false;
   private lastHoverTime: string | number | null = null;
+  private readonly onMouseLeave = () => this.clearHover();
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -170,11 +171,19 @@ export class Chart {
       }
     });
 
-    // Forward hover to the consumer.
-    this.priceChart.subscribeCrosshairMove((p) => this.handleHover(p.time as number | string | null));
-    this.volChart.subscribeCrosshairMove((p) => this.handleHover(p.time as number | string | null));
-    this.rsiChart.subscribeCrosshairMove((p) => this.handleHover(p.time as number | string | null));
-    this.macdChart.subscribeCrosshairMove((p) => this.handleHover(p.time as number | string | null));
+    // Forward hover to the consumer. The panes are separate charts separated
+    // by a grid gap; crossing that gap fires a null-time crosshair move on the
+    // pane being left. Forwarding those nulls would unmount/remount the OHLC
+    // box and thrash layout on every crossing, so only real time hits are
+    // forwarded and the hover is cleared once via container mouseleave.
+    const forwardTime = (p: { time?: unknown }) => {
+      if (p.time != null) this.handleHover(p.time as number | string);
+    };
+    this.priceChart.subscribeCrosshairMove(forwardTime);
+    this.volChart.subscribeCrosshairMove(forwardTime);
+    this.rsiChart.subscribeCrosshairMove(forwardTime);
+    this.macdChart.subscribeCrosshairMove(forwardTime);
+    this.container.addEventListener("mouseleave", this.onMouseLeave);
   }
 
   private makePane(parent: HTMLElement, _label: string): HTMLElement {
@@ -188,34 +197,32 @@ export class Chart {
     return div;
   }
 
-  private handleHover(t: number | string | null) {
-    if (t == null) {
-      if (this.lastHoverTime !== null && this.hoverCb) {
-        this.lastHoverTime = null;
-        this.hoverCb(null);
-      }
-      return;
-    }
+  private handleHover(t: number | string) {
     // Business days come in as a unix timestamp string (YYYY-MM-DD); find the
     // matching row. We debounce by frame so we don't fire on every micro-tick.
-    const tNorm = t as number | string;
-    if (this.lastHoverTime === tNorm) return;
-    this.lastHoverTime = tNorm;
+    if (this.lastHoverTime === t) return;
+    this.lastHoverTime = t;
     if (this.rafPending) return;
     this.rafPending = true;
     requestAnimationFrame(() => {
       this.rafPending = false;
-      if (!this.data) return;
+      if (!this.data || this.lastHoverTime === null) return;
+      const tNorm = this.lastHoverTime;
       let date: string | null = null;
       if (typeof tNorm === "number") {
         // Convert unix seconds to YYYY-MM-DD.
-        const d = new Date(tNorm * 1000);
-        date = d.toISOString().slice(0, 10);
+        date = new Date(tNorm * 1000).toISOString().slice(0, 10);
       } else {
         date = tNorm;
       }
       if (this.data.dates.includes(date) && this.hoverCb) this.hoverCb(date);
     });
+  }
+
+  private clearHover() {
+    this.rafPending = false;
+    this.lastHoverTime = null;
+    if (this.hoverCb) this.hoverCb(null);
   }
 
   onHover(cb: (d: string | null) => void) {
@@ -306,6 +313,7 @@ export class Chart {
   }
 
   destroy() {
+    this.container.removeEventListener("mouseleave", this.onMouseLeave);
     this.priceChart.remove();
     this.volChart.remove();
     this.rsiChart.remove();

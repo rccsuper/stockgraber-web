@@ -4,6 +4,8 @@ import App from "./App";
 import "./styles.css";
 
 window.addEventListener("error", (e) => {
+  // Benign browser noise from ResizeObserver users like lightweight-charts.
+  if (/ResizeObserver loop (completed with undelivered notifications|limit exceeded)/.test(e.message)) return;
   const d = document.createElement("pre");
   d.id = "err-overlay";
   d.style.cssText = "position:fixed;top:0;left:0;right:0;background:#400;color:#fff;padding:12px;z-index:9999;font:11px monospace;white-space:pre-wrap;max-height:50vh;overflow:auto";
