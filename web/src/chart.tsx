@@ -88,6 +88,7 @@ export class Chart {
 
   private data: Ohlcv | null = null;
   private logScale = false;
+  private lineChart = false;
   private hoverCb: ((d: string | null) => void) | null = null;
 
   private rafPending = false;
@@ -253,6 +254,7 @@ export class Chart {
     this.data = p.data;
     this.compare = p.compare;
     this.logScale = !!p.logScale;
+    this.lineChart = !!p.lineChart;
     if (p.data) {
       this.renderPrice();
       this.renderVolume();
@@ -358,6 +360,14 @@ export class Chart {
 
     if (this.compare) {
       this.renderPercent(times, close, fast, slow);
+    } else if (this.lineChart) {
+      this.priceSeries = this.priceChart.addSeries(LineSeries, {
+        color: T.up,
+        lineWidth: 2 as 2,
+        priceLineVisible: false,
+        lastValueVisible: false,
+      });
+      this.priceSeries.setData(times.map((t, i) => ({ time: t, value: close[i] })));
     } else {
       this.priceSeries = this.priceChart.addSeries(CandlestickSeries, {
         upColor: T.up,
