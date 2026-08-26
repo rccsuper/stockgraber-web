@@ -285,9 +285,22 @@ export class Chart {
   setShowPanels(p: { volume: boolean; rsi: boolean; macd: boolean }) {
     const panes = this.container.children;
     // 0: price (always visible), 1: volume, 2: rsi, 3: macd
-    (panes[1] as HTMLElement).style.display = p.volume ? "" : "none";
-    (panes[2] as HTMLElement).style.display = p.rsi ? "" : "none";
-    (panes[3] as HTMLElement).style.display = p.macd ? "" : "none";
+    const vis = {
+      vol: p.volume !== false,
+      rsi: p.rsi !== false,
+      macd: p.macd !== false,
+    };
+    (panes[1] as HTMLElement).style.display = vis.vol ? "" : "none";
+    (panes[2] as HTMLElement).style.display = vis.rsi ? "" : "none";
+    (panes[3] as HTMLElement).style.display = vis.macd ? "" : "none";
+    // Rebuild the grid rows so hidden panes release their track space and the
+    // remaining charts (especially price) grow to fill it. Tracks follow DOM
+    // order: price, volume, rsi, macd.
+    const rows: string[] = ["minmax(0, 6fr)"];
+    if (vis.vol) rows.push("minmax(0, 2fr)");
+    if (vis.rsi) rows.push("minmax(0, 2fr)");
+    if (vis.macd) rows.push("minmax(0, 3fr)");
+    this.container.style.gridTemplateRows = rows.join(" ");
   }
 
   setLogScale(flag: boolean) {
