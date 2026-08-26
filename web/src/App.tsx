@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, type OhlcResponse } from "./api";
 import { Chart, type CompareData } from "./chart";
 import { tr, type Lang } from "./i18n";
@@ -18,6 +18,10 @@ const DOWN = "#f6465d";
 
 const FONT_STACK = '"JetBrains Mono", "Consolas", "Menlo", monospace';
 
+// Keep the button in its loading state at least this long so near-instant
+// (cached) responses don't flicker "Load" <-> "…".
+const MIN_LOAD_MS = 250;
+
 function todayISO() { return new Date().toISOString().slice(0, 10); }
 function yearsAgoISO(years: number) {
   const d = new Date();
@@ -33,7 +37,9 @@ interface OhlcBox {
 
 export default function App() {
   const [lang, setLang] = useState<Lang>("en");
-  const t = (k: string) => tr(k, lang);
+  // Stable identity across renders: `t` is in the load effect's dependency
+  // array, so a fresh function per render would refetch on every render.
+  const t = useCallback((k: string) => tr(k, lang), [lang]);
   const [symbol, setSymbol] = useState("AAPL");
   const [startDate, setStartDate] = useState(yearsAgoISO(2));
   const [endDate, setEndDate] = useState(todayISO());
@@ -53,6 +59,7 @@ export default function App() {
   // index comparison
   const [compareTicker, setCompareTicker] = useState<string>("");
   const [compareOhlc, setCompareOhlc] = useState<OhlcResponse | null>(null);
+  const loadReqIdRef = useRef(0);
   const compareReqIdRef = useRef(0);
 
   // timeframe, search
@@ -65,12 +72,20 @@ export default function App() {
     if (!symbol) return;
     if (endDate < startDate) { setError(t("invalid_range_msg")); return; }
     setError(null);
-    const reqId = ++compareReqIdRef.current;
+    const reqId = ++loadReqIdRef.current;
     setLoading(true);
+    const startedAt = Date.now();
+    let timer: ReturnType<typeof setTimeout> | undefined;
     api.ohlc({ symbol, start: startDate, end: endDate, maFast: MA_PRESETS[maIdx].fast, maSlow: MA_PRESETS[maIdx].slow, maMethod })
-      .then((d) => { if (reqId === compareReqIdRef.current) setData(d); })
-      .catch((e) => { if (reqId === compareReqIdRef.current) setError(e?.message ?? String(e)); })
-      .finally(() => { if (reqId === compareReqIdRef.current) setLoading(false); });
+      .then((d) => { if (reqId === loadReqIdRef.current) setData(d); })
+      .catch((e) => { if (reqId === loadReqIdRef.current) setError(e?.message ?? String(e)); })
+      .finally(() => {
+        if (reqId !== loadReqIdRef.current) return;
+        timer = setTimeout(() => {
+          if (reqId === loadReqIdRef.current) setLoading(false);
+        }, Math.max(0, MIN_LOAD_MS - (Date.now() - startedAt)));
+      });
+    return () => clearTimeout(timer);
   }, [symbol, startDate, endDate, maIdx, maMethod, t]);
 
   // ---- load index (debounced) ----
