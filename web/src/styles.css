@@ -1,6 +1,7 @@
 /* StockGraber web — design tokens + global styles. */
 
 :root {
+  color-scheme: dark;
   --bg0: #000000;
   --shell: #060607;
   --panel: #050506;
