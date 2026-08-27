@@ -39,7 +39,7 @@ const T = {
   volDown: "rgba(246,70,93,0.55)",
   yellow: "#ffff00",
   text: "#e8eaed",
-  muted: "#8a909a",
+  muted: "#aeb4be",
 };
 
 const FONT = "JetBrains Mono, Consolas, monospace";
