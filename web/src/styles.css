@@ -77,6 +77,16 @@ input, select, button { color: inherit; }
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
+.cmd-row { display: flex; align-items: center; gap: 12px; }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 8px 16px;
+  background: var(--shell);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.topbar-left { display: flex; align-items: center; gap: 11px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
 .input {
   width: 130px;
   background: #0d0d11; color: var(--txt);

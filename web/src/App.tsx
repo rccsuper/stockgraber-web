@@ -225,6 +225,24 @@ export default function App() {
           <div className="header-symbol">{data ? `${symbol} · ${exchangeOf(symbol)}` : symbol}</div>
         </div>
         <div className="topbar-right">
+          <div className="seg">
+            {TIMEFRAMES.map((tf, i) => (
+              <button
+                type="button"
+                key={tf.label}
+                className={`seg-btn ${i === tfIdx ? "on" : ""}`}
+                onClick={() => applyTimeframe(i)}
+              >
+                {tf.label}
+              </button>
+            ))}
+          </div>
+
+          <DateField label={t("from")} value={startDate}
+            onChange={(v) => { setStartDate(v); setTfIdx(-1); }} />
+          <DateField label={t("to")} value={endDate}
+            onChange={(v) => { setEndDate(v); setTfIdx(-1); }} />
+
           <button className="lang-btn" onClick={() => setLang(lang === "en" ? "zh" : "en")}>
             {lang === "en" ? "中文" : "EN"}
           </button>
@@ -246,26 +264,6 @@ export default function App() {
           <button type="button" className="tool-btn" onClick={() => setSearchOpen(true)}>
             {t("find")}
           </button>
-
-          <div className="seg">
-            {TIMEFRAMES.map((tf, i) => (
-              <button
-                type="button"
-                key={tf.label}
-                className={`seg-btn ${i === tfIdx ? "on" : ""}`}
-                onClick={() => applyTimeframe(i)}
-              >
-                {tf.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="grow" />
-
-          <DateField label={t("from")} value={startDate}
-            onChange={(v) => { setStartDate(v); setTfIdx(-1); }} />
-          <DateField label={t("to")} value={endDate}
-            onChange={(v) => { setEndDate(v); setTfIdx(-1); }} />
         </form>
         {error && <div className="error">{t("load_failed")}: {error}</div>}
       </div>
