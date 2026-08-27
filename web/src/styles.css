@@ -274,8 +274,16 @@ input, select, button { color: inherit; }
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 13px; color-scheme: dark;
   outline: none;
+  padding-right: 36px;
 }
 .date-input:focus { border-color: var(--accent); }
+.date-wrap { position: relative; display: flex; align-items: center; }
+.date-pick {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  width: 30px; height: 28px; padding: 0; border: none;
+  background: transparent; color: var(--mut2); cursor: pointer;
+}
+.date-pick::-webkit-calendar-picker-indicator { cursor: pointer; }
 
 /* legend */
 .legend-rows { display: flex; flex-direction: column; gap: 5px; }

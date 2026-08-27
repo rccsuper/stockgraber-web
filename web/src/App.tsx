@@ -38,6 +38,37 @@ function isDatePrefix(v: string) {
   return /^\d{4}(-\d{1,2}(-\d{1,2})?)?$/.test(v);
 }
 
+// Date field with both a calendar dropdown and free typing. The visible box is a
+// YYYY-MM-DD text input; a small native date input sits on the right and opens
+// the browser calendar picker, writing its selection back as YYYY-MM-DD.
+function DateField({
+  label, value, onChange,
+}: { label: string; value: string; onChange: (v: string) => void }) {
+  const full = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  return (
+    <label className="date-field">
+      <span>{label}</span>
+      <div className="date-wrap">
+        <input
+          type="text"
+          inputMode="numeric"
+          placeholder="YYYY-MM-DD"
+          className="date-input"
+          value={value}
+          onChange={(e) => { if (isDatePrefix(e.target.value)) onChange(e.target.value); }}
+        />
+        <input
+          type="date"
+          className="date-pick"
+          value={full ? value : ""}
+          onChange={(e) => { if (e.target.value) onChange(e.target.value); }}
+          aria-label={`${label} picker`}
+        />
+      </div>
+    </label>
+  );
+}
+
 interface OhlcBox {
   date: string;
   o: number; h: number; l: number; c: number;
@@ -239,28 +270,10 @@ export default function App() {
 
           <div className="grow" />
 
-          <label className="date-field">
-            <span>{t("from")}</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="YYYY-MM-DD"
-              className="date-input"
-              value={startDate}
-              onChange={(e) => { if (isDatePrefix(e.target.value)) { setStartDate(e.target.value); setTfIdx(-1); } }}
-            />
-          </label>
-          <label className="date-field">
-            <span>{t("to")}</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="YYYY-MM-DD"
-              className="date-input"
-              value={endDate}
-              onChange={(e) => { if (isDatePrefix(e.target.value)) { setEndDate(e.target.value); setTfIdx(-1); } }}
-            />
-          </label>
+          <DateField label={t("from")} value={startDate}
+            onChange={(v) => { setStartDate(v); setTfIdx(-1); }} />
+          <DateField label={t("to")} value={endDate}
+            onChange={(v) => { setEndDate(v); setTfIdx(-1); }} />
         </form>
         {error && <div className="error">{t("load_failed")}: {error}</div>}
       </div>
