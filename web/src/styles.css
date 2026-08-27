@@ -120,7 +120,7 @@ input, select, button { color: inherit; }
   cursor: pointer;
 }
 .seg:hover { color: var(--txt); }
-.seg.on { background: #23262e; color: #fff; }
+.seg-btn.on { background: var(--accent); color: #fff; box-shadow: 0 0 0 1px rgba(255,255,255,0.18) inset; }
 
 /* body */
 .body { display: flex; flex: 1; min-height: 0; }
