@@ -280,7 +280,7 @@ export class Chart {
       this.renderVolume();
       this.renderRsi();
       this.renderMacd();
-      this.priceChart.timeScale().fitContent();
+      this.alignPanes();
     }
     this.setShowPanels({
       volume: p.showVolume !== false,
@@ -296,7 +296,7 @@ export class Chart {
     this.renderVolume();
     this.renderRsi();
     this.renderMacd();
-    this.priceChart.timeScale().fitContent();
+    this.alignPanes();
   }
 
   setCompareData(c: CompareData | null) {
@@ -332,6 +332,23 @@ export class Chart {
         mode: flag ? 1 : 0,
       });
     }
+  }
+
+  /** Fit the price pane, then force every other pane to the exact same logical
+   * range so all x-axes share identical dates. We copy the price range after a
+   * tick because fitContent() applies asynchronously and does not fire the
+   * visible-range subscription. */
+  private alignPanes() {
+    const copy = () => {
+      const r = this.priceChart.timeScale().getVisibleLogicalRange();
+      if (!r) return;
+      this.volChart.timeScale().setVisibleLogicalRange(r);
+      this.rsiChart.timeScale().setVisibleLogicalRange(r);
+      this.macdChart.timeScale().setVisibleLogicalRange(r);
+    };
+    this.priceChart.timeScale().fitContent();
+    copy();
+    setTimeout(copy, 60);
   }
 
   setVisibleRange(from: number, to: number) {
@@ -522,7 +539,7 @@ export class Chart {
       priceLineVisible: false,
     });
     this.rsiSeries.setData(
-      dates.flatMap((d, i) => indicators.rsi[i] == null ? [] : [{ time: d as unknown as Time, value: indicators.rsi[i] as number }]),
+      dates.map((d, i) => ({ time: d as unknown as Time, value: indicators.rsi[i] as number | null })),
     );
   }
 
@@ -534,9 +551,9 @@ export class Chart {
     const { dates, indicators } = this.data;
     const m = indicators.macd;
     this.macdLine = this.macdChart.addSeries(LineSeries, { color: T.maFast, lineWidth: 1 as 1, priceLineVisible: false });
-    this.macdLine.setData(dates.flatMap((d, i) => m.line[i] == null ? [] : [{ time: d as unknown as Time, value: m.line[i] as number }]));
+    this.macdLine.setData(dates.map((d, i) => ({ time: d as unknown as Time, value: m.line[i] as number | null })));
     this.macdSignal = this.macdChart.addSeries(LineSeries, { color: T.maSlow, lineWidth: 1 as 1, priceLineVisible: false });
-    this.macdSignal.setData(dates.flatMap((d, i) => m.signal[i] == null ? [] : [{ time: d as unknown as Time, value: m.signal[i] as number }]));
+    this.macdSignal.setData(dates.map((d, i) => ({ time: d as unknown as Time, value: m.signal[i] as number | null })));
     this.macdHist = this.macdChart.addSeries(HistogramSeries, { priceLineVisible: false });
     this.macdHist.setData(
       dates.map((d, i) => ({
