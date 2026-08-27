@@ -247,7 +247,7 @@ export default function App() {
               placeholder="YYYY-MM-DD"
               className="date-input"
               value={startDate}
-              onChange={(e) => { if (isDatePrefix(e.target.value)) setStartDate(e.target.value); }}
+              onChange={(e) => { if (isDatePrefix(e.target.value)) { setStartDate(e.target.value); setTfIdx(-1); } }}
             />
           </label>
           <label className="date-field">
@@ -258,7 +258,7 @@ export default function App() {
               placeholder="YYYY-MM-DD"
               className="date-input"
               value={endDate}
-              onChange={(e) => { if (isDatePrefix(e.target.value)) setEndDate(e.target.value); }}
+              onChange={(e) => { if (isDatePrefix(e.target.value)) { setEndDate(e.target.value); setTfIdx(-1); } }}
             />
           </label>
         </form>
