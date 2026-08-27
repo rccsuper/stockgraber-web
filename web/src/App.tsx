@@ -33,46 +33,29 @@ function daysAgoISO(days: number) {
   d.setDate(d.getDate() - days);
   return d.toISOString().slice(0, 10);
 }
-// Date field with both a calendar dropdown and free typing. The visible box is a
-// freely editable YYYY-MM-DD text input; a small native date input on the right
-// opens the browser calendar picker and writes its selection back. The parent is
-// only updated once a complete valid date is entered, so mid-edit keystrokes
-// (which would be invalid) don't reject the edit or trigger a reload.
+// Read-only date box that displays YYYY-MM-DD and opens the native calendar
+// picker on click (no typing). A hidden <input type="date"> drives the picker
+// and writes its selection back as YYYY-MM-DD.
 function DateField({
-  label, value, onChange, onEdit,
-}: { label: string; value: string; onChange: (v: string) => void; onEdit: () => void }) {
-  const [text, setText] = useState(value);
-  useEffect(() => { setText(value); }, [value]);
-  const full = /^\d{4}-\d{2}-\d{2}$/.test(text);
-  const onText = (v: string) => {
-    setText(v);
-    onEdit();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) onChange(v);
-  };
-  const onPick = (v: string) => {
-    setText(v);
-    onEdit();
-    if (v) onChange(v);
+  label, value, onChange,
+}: { label: string; value: string; onChange: (v: string) => void }) {
+  const ref = useRef<HTMLInputElement | null>(null);
+  const full = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const open = () => {
+    const el = ref.current;
+    if (el) { if ((el as any).showPicker) (el as any).showPicker(); else el.click(); }
   };
   return (
     <label className="date-field">
       <span>{label}</span>
       <div className="date-wrap">
-        <input
-          type="text"
-          inputMode="numeric"
-          placeholder="YYYY-MM-DD"
-          className="date-input"
-          value={text}
-          onChange={(e) => onText(e.target.value)}
-        />
-        <input
-          type="date"
-          className="date-pick"
-          value={full ? text : ""}
-          onChange={(e) => onPick(e.target.value)}
-          aria-label={`${label} picker`}
-        />
+        <button type="button" className={`date-input date-btn${value ? "" : " empty"}`} onClick={open}>
+          {value || "YYYY-MM-DD"}
+        </button>
+        <span className="date-cal">▾</span>
+        <input ref={ref} type="date" className="date-hidden" tabIndex={-1} aria-hidden="true"
+          value={full ? value : ""}
+          onChange={(e) => { if (e.target.value) onChange(e.target.value); }} />
       </div>
     </label>
   );
@@ -280,11 +263,9 @@ export default function App() {
           <div className="grow" />
 
           <DateField label={t("from")} value={startDate}
-            onEdit={() => setTfIdx(-1)}
-            onChange={(v) => setStartDate(v)} />
+            onChange={(v) => { setStartDate(v); setTfIdx(-1); }} />
           <DateField label={t("to")} value={endDate}
-            onEdit={() => setTfIdx(-1)}
-            onChange={(v) => setEndDate(v)} />
+            onChange={(v) => { setEndDate(v); setTfIdx(-1); }} />
         </form>
         {error && <div className="error">{t("load_failed")}: {error}</div>}
       </div>

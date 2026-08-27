@@ -270,20 +270,23 @@ input, select, button { color: inherit; }
 .date-input {
   background: var(--inset); color: var(--txt2);
   border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 9px; padding: 7px 10px;
+  border-radius: 9px; padding: 7px 34px 7px 10px;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 13px; color-scheme: dark;
   outline: none;
-  padding-right: 36px;
 }
 .date-input:focus { border-color: var(--accent); }
-.date-wrap { position: relative; display: flex; align-items: center; }
-.date-pick {
-  position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
-  width: 30px; height: 28px; padding: 0; border: none;
-  background: transparent; color: var(--mut2); cursor: pointer;
+.date-btn {
+  width: 100%; text-align: left; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
 }
-.date-pick::-webkit-calendar-picker-indicator { cursor: pointer; }
+.date-btn.empty { color: var(--mut2); }
+.date-wrap { position: relative; display: flex; align-items: center; }
+.date-cal {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  color: var(--mut2); pointer-events: none; font-size: 12px;
+}
+.date-hidden { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; }
 
 /* legend */
 .legend-rows { display: flex; flex-direction: column; gap: 5px; }
