@@ -28,6 +28,11 @@ function yearsAgoISO(years: number) {
   d.setFullYear(d.getFullYear() - years);
   return d.toISOString().slice(0, 10);
 }
+function daysAgoISO(days: number) {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toISOString().slice(0, 10);
+}
 
 interface OhlcBox {
   date: string;
@@ -121,10 +126,15 @@ export default function App() {
   }
   function applyTimeframe(idx: number) {
     setTfIdx(idx);
-    // The lightweight-charts zoom is driven by mouse drag; the timeframe
-    // buttons are an info-level hint. We can still re-derive a logical range
-    // hint: 6M = 126 bars, 1Y = 252, etc.
-    void idx;
+    const tf = TIMEFRAMES[idx];
+    setEndDate(todayISO());
+    if (tf.bars == null) {
+      // MAX — go back far enough to cover the full history.
+      setStartDate(yearsAgoISO(30));
+    } else {
+      // bars are trading days; convert to calendar days (~1.4x) with a buffer.
+      setStartDate(daysAgoISO(Math.round(tf.bars * 1.4) + 2));
+    }
   }
   function onCompareChange(e: React.ChangeEvent<HTMLSelectElement>) {
     setCompareTicker(e.target.value);
