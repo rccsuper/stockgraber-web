@@ -89,6 +89,8 @@ export class Chart {
   private data: Ohlcv | null = null;
   private logScale = false;
   private lineChart = false;
+  private syncing = false;
+  private syncTimer: ReturnType<typeof setTimeout> | null = null;
   private hoverCb: ((d: string | null) => void) | null = null;
 
   private rafPending = false;
@@ -154,18 +156,36 @@ export class Chart {
       { time: 1e15 as Time, value: 30 },
     ]);
 
-    // Share the time scale between panes.
+    // Share the time scale between panes. The visible-range subscriptions fire
+    // asynchronously (next frame), so a brief timed lock — not just a synchronous
+    // flag — is needed to stop the programmatic propagation from echoing back and
+    // clobbering fitContent().
+    const lock = () => {
+      this.syncing = true;
+      if (this.syncTimer) clearTimeout(this.syncTimer);
+      this.syncTimer = setTimeout(() => { this.syncing = false; }, 60);
+    };
     this.volChart.timeScale().subscribeVisibleLogicalRangeChange((r) => {
-      if (r) this.priceChart.timeScale().setVisibleLogicalRange(r);
+      if (r && !this.syncing) {
+        lock();
+        this.priceChart.timeScale().setVisibleLogicalRange(r);
+      }
     });
     this.rsiChart.timeScale().subscribeVisibleLogicalRangeChange((r) => {
-      if (r) this.priceChart.timeScale().setVisibleLogicalRange(r);
+      if (r && !this.syncing) {
+        lock();
+        this.priceChart.timeScale().setVisibleLogicalRange(r);
+      }
     });
     this.macdChart.timeScale().subscribeVisibleLogicalRangeChange((r) => {
-      if (r) this.priceChart.timeScale().setVisibleLogicalRange(r);
+      if (r && !this.syncing) {
+        lock();
+        this.priceChart.timeScale().setVisibleLogicalRange(r);
+      }
     });
     this.priceChart.timeScale().subscribeVisibleLogicalRangeChange((r) => {
-      if (r) {
+      if (r && !this.syncing) {
+        lock();
         this.volChart.timeScale().setVisibleLogicalRange(r);
         this.rsiChart.timeScale().setVisibleLogicalRange(r);
         this.macdChart.timeScale().setVisibleLogicalRange(r);
