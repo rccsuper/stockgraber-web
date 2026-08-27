@@ -211,14 +211,14 @@ input, select, button { color: inherit; }
 .q-ticker { color: var(--txt); font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 18px; font-weight: 700; }
 .q-name { color: var(--mut); font-size: 12px; }
 .q-exch {
-  color: var(--mut2); font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: var(--txt2); font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 10px; border: 1px solid #1c1c22; border-radius: 6px;
   padding: 3px 7px;
 }
 .quote-price { display: flex; align-items: baseline; gap: 10px; }
 .q-close { color: #fff; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 28px; font-weight: 700; }
 .q-pill { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12px; padding-bottom: 4px; }
-.q-sub { color: var(--dim); font-size: 11px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.q-sub { color: var(--txt2); font-size: 11px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
 
 /* tiles */
 .tiles { display: flex; gap: 10px; }
@@ -228,7 +228,7 @@ input, select, button { color: inherit; }
   border-radius: 9px; padding: 9px 11px;
   display: flex; flex-direction: column; gap: 2px;
 }
-.tile-cap { color: var(--mut2); font-size: 10px; }
+.tile-cap { color: var(--txt2); font-size: 10px; }
 .tile-val { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 16px; font-weight: 600; }
 
 /* row + switch */
