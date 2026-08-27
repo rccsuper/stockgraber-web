@@ -33,18 +33,27 @@ function daysAgoISO(days: number) {
   d.setDate(d.getDate() - days);
   return d.toISOString().slice(0, 10);
 }
-// Allow progressive typing of a YYYY-MM-DD value (year, year-month, or full).
-function isDatePrefix(v: string) {
-  return /^\d{4}(-\d{1,2}(-\d{1,2})?)?$/.test(v);
-}
-
 // Date field with both a calendar dropdown and free typing. The visible box is a
-// YYYY-MM-DD text input; a small native date input sits on the right and opens
-// the browser calendar picker, writing its selection back as YYYY-MM-DD.
+// freely editable YYYY-MM-DD text input; a small native date input on the right
+// opens the browser calendar picker and writes its selection back. The parent is
+// only updated once a complete valid date is entered, so mid-edit keystrokes
+// (which would be invalid) don't reject the edit or trigger a reload.
 function DateField({
-  label, value, onChange,
-}: { label: string; value: string; onChange: (v: string) => void }) {
-  const full = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  label, value, onChange, onEdit,
+}: { label: string; value: string; onChange: (v: string) => void; onEdit: () => void }) {
+  const [text, setText] = useState(value);
+  useEffect(() => { setText(value); }, [value]);
+  const full = /^\d{4}-\d{2}-\d{2}$/.test(text);
+  const onText = (v: string) => {
+    setText(v);
+    onEdit();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) onChange(v);
+  };
+  const onPick = (v: string) => {
+    setText(v);
+    onEdit();
+    if (v) onChange(v);
+  };
   return (
     <label className="date-field">
       <span>{label}</span>
@@ -54,14 +63,14 @@ function DateField({
           inputMode="numeric"
           placeholder="YYYY-MM-DD"
           className="date-input"
-          value={value}
-          onChange={(e) => { if (isDatePrefix(e.target.value)) onChange(e.target.value); }}
+          value={text}
+          onChange={(e) => onText(e.target.value)}
         />
         <input
           type="date"
           className="date-pick"
-          value={full ? value : ""}
-          onChange={(e) => { if (e.target.value) onChange(e.target.value); }}
+          value={full ? text : ""}
+          onChange={(e) => onPick(e.target.value)}
           aria-label={`${label} picker`}
         />
       </div>
@@ -271,9 +280,11 @@ export default function App() {
           <div className="grow" />
 
           <DateField label={t("from")} value={startDate}
-            onChange={(v) => { setStartDate(v); setTfIdx(-1); }} />
+            onEdit={() => setTfIdx(-1)}
+            onChange={(v) => setStartDate(v)} />
           <DateField label={t("to")} value={endDate}
-            onChange={(v) => { setEndDate(v); setTfIdx(-1); }} />
+            onEdit={() => setTfIdx(-1)}
+            onChange={(v) => setEndDate(v)} />
         </form>
         {error && <div className="error">{t("load_failed")}: {error}</div>}
       </div>
