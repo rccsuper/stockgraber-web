@@ -33,6 +33,10 @@ function daysAgoISO(days: number) {
   d.setDate(d.getDate() - days);
   return d.toISOString().slice(0, 10);
 }
+// Allow progressive typing of a YYYY-MM-DD value (year, year-month, or full).
+function isDatePrefix(v: string) {
+  return /^\d{4}(-\d{1,2}(-\d{1,2})?)?$/.test(v);
+}
 
 interface OhlcBox {
   date: string;
@@ -237,11 +241,25 @@ export default function App() {
 
           <label className="date-field">
             <span>{t("from")}</span>
-            <input type="date" value={startDate} max={endDate} onChange={(e) => setStartDate(e.target.value)} />
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="YYYY-MM-DD"
+              className="date-input"
+              value={startDate}
+              onChange={(e) => { if (isDatePrefix(e.target.value)) setStartDate(e.target.value); }}
+            />
           </label>
           <label className="date-field">
             <span>{t("to")}</span>
-            <input type="date" value={endDate} min={startDate} max={todayISO()} onChange={(e) => setEndDate(e.target.value)} />
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="YYYY-MM-DD"
+              className="date-input"
+              value={endDate}
+              onChange={(e) => { if (isDatePrefix(e.target.value)) setEndDate(e.target.value); }}
+            />
           </label>
         </form>
         {error && <div className="error">{t("load_failed")}: {error}</div>}
